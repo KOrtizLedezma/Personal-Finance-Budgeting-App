@@ -1,31 +1,44 @@
-import { StyleSheet } from 'react-native';
+import Screen from "@/components/Screen";
+import { View } from "react-native";
+import { Text, Button } from "react-native-paper";
+import { Link } from "expo-router";
+import { useUI } from "@/store/ui";
+import { useHome } from "@/lib/hooks/useHome";
+import MonthSwitcher from "@/components/MonthSwitcher";
+import SummaryCard from "@/components/SummaryCard";
+import TxnList from "@/components/TxnList";
+import { formatCents } from "@/lib/utils/money";
 
-import EditScreenInfo from '@/components/EditScreenInfo';
-import { Text, View } from '@/components/Themed';
+export default function Home() {
+  const { month, setMonth } = useUI();
+  const { txns, loading, refresh, monthLabel, totalCents } = useHome(month);
 
-export default function TabOneScreen() {
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Tab One</Text>
-      <View style={styles.separator} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />
-      <EditScreenInfo path="app/(tabs)/index.tsx" />
-    </View>
+    <Screen>
+      <View style={{ gap: 12, flex: 1 }}>
+        <Text variant="titleLarge">{monthLabel}</Text>
+
+        <MonthSwitcher
+          month={month}
+          setMonth={setMonth}
+          rightExtra={
+            <Link href="/(tabs)/Add" asChild>
+              <Button mode="contained">Add new</Button>
+            </Link>
+          }
+        />
+
+        <SummaryCard
+          totalLabel="Total"
+          totalValue={formatCents(totalCents)}
+          count={txns.length}
+        />
+
+        <Text variant="titleMedium" style={{ marginTop: 8 }}>
+          Recent
+        </Text>
+        <TxnList data={txns} loading={loading} onRefresh={refresh} />
+      </View>
+    </Screen>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  separator: {
-    marginVertical: 30,
-    height: 1,
-    width: '80%',
-  },
-});
